@@ -32,6 +32,7 @@ class DinoRun extends FlameGame with TapDetector, HasCollisionDetection {
     'parallax/plx-4.png',
     'parallax/plx-5.png',
     'parallax/plx-6.png',
+    'coins.png'
   ];
 
   // List of all the audio assets.
