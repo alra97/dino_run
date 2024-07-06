@@ -1,3 +1,8 @@
+Check these sites for images:
+https://imagy.app/image-size-finder/
+https://www.freepik.com/
+https://www.freepik.com/photo-editor/new-artboard?photo=https%3A%2F%2Ffreepik.removal.ai%2Ff1%2Foriginal%2F010bbb5c-fdba-4cda-935e-e4d08cb93f95_26HON8.png&from_view=detail&id=4815180
+
 # Dino Run
 
 A 2D infinite side scroller made using [Flame](https://flame-engine.org/) engine.
