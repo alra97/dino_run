@@ -34,6 +34,8 @@ flutter:
     - assets/images/AngryPig/
     - assets/images/Bat/
     - assets/images/Rino/
+    - assets/images/boop/
+    - assets/images/pink/
     - assets/audio/
 
   fonts:

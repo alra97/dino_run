@@ -19,3 +19,4 @@ class EnemyData {
     required this.canFly,
   });
 }
+

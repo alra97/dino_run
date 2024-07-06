@@ -24,6 +24,18 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
 
   // This method is responsible for spawning a random enemy.
   void spawnRandomEnemy() {
+    final boopEnemyIndex = _data.indexWhere((enemyData) => enemyData.image.toString().contains('fly.png'));
+
+  if (boopEnemyIndex != -1) {
+    // "boop" enemy found, prioritize spawning it
+    final enemyData = _data[boopEnemyIndex];
+    // ... rest of the enemy spawning logic using enemyData
+  } else {
+    // "boop" enemy not found, proceed with normal random selection
+    final randomIndex = _random.nextInt(_data.length);
+    final enemyData = _data.elementAt(randomIndex);
+    // ... rest of the enemy spawning logic using enemyData
+  }
     /// Generate a random index within [_data] and get an [EnemyData].
     final randomIndex = _random.nextInt(_data.length);
     final enemyData = _data.elementAt(randomIndex);
@@ -46,7 +58,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
     // use textureSize as size for the components.
     enemy.size = enemyData.textureSize;
     game.world.add(enemy);
-  }
+    }
 
   @override
   void onMount() {
@@ -82,6 +94,23 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
           speedX: 150,
           canFly: false,
         ),
+        EnemyData(
+        image: game.images.fromCache('boop/run.jpg'),
+        nFrames: 7, // Replace with the actual number of animation frames in "boop.jpg"
+        stepTime:0.09, // Adjust if needed for animation speed
+        textureSize: Vector2(52, 34),
+        speedX: 150,
+        canFly: false,
+        ),
+      EnemyData(
+        image: game.images.fromCache('pink/fly.png'),
+        nFrames: 7, // Replace with the actual number of animation frames in "xex.png"
+        stepTime:0.1, // Adjust if needed for animation speed
+        textureSize: Vector2(46, 30),
+        speedX: 100,
+        canFly: true,
+        ),
+        
       ]);
     }
     _timer.start();

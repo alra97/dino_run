@@ -26,6 +26,8 @@ class DinoRun extends FlameGame with TapDetector, HasCollisionDetection {
     'AngryPig/Walk (36x30).png',
     'Bat/Flying (46x30).png',
     'Rino/Run (52x34).png',
+    'boop/run.jpg',
+    'pink/fly.png',
     'parallax/plx-1.png',
     'parallax/plx-2.png',
     'parallax/plx-3.png',
