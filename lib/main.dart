@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flame/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
@@ -16,7 +18,7 @@ import 'widgets/game_over_menu.dart';
 
 Future<void> main() async {
   // Ensures that all bindings are initialized
-  // before was start calling hive and flame code
+  // before we start calling hive and flame code
   // dealing with platform channels.
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -25,7 +27,7 @@ Future<void> main() async {
   runApp(const DinoRunApp());
 }
 
-// This function will initilize hive with apps documents directory.
+// This function will initialize hive with apps documents directory.
 // Additionally it will also register all the hive adapters.
 Future<void> initHive() async {
   // For web hive does not need to be initialized.
@@ -39,8 +41,47 @@ Future<void> initHive() async {
 }
 
 // The main widget for this game.
-class DinoRunApp extends StatelessWidget {
+class DinoRunApp extends StatefulWidget {
   const DinoRunApp({super.key});
+
+  @override
+  _DinoRunAppState createState() => _DinoRunAppState();
+}
+
+class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.inactive) {
+      clearCacheAndUserData();
+    }
+  }
+
+  Future<void> clearCacheAndUserData() async {
+    // Clear cache
+    final cacheDir = await getTemporaryDirectory();
+    if (cacheDir.existsSync()) {
+      cacheDir.deleteSync(recursive: true);
+    }
+
+    // Clear Hive data
+    await Hive.close();
+    final appDir = await getApplicationDocumentsDirectory();
+    Directory(appDir.path).deleteSync(recursive: true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +92,7 @@ class DinoRunApp extends StatelessWidget {
         fontFamily: 'Audiowide',
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Settings up some default theme for elevated buttons.
+        // Setting up some default theme for elevated buttons.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -61,9 +102,9 @@ class DinoRunApp extends StatelessWidget {
       ),
       home: Scaffold(
         body: GameWidget<DinoRun>.controlled(
-          // This will dislpay a loading bar until [DinoRun] completes
+          // This will display a loading bar until [DinoRun] completes
           // its onLoad method.
-          loadingBuilder: (conetxt) => const Center(
+          loadingBuilder: (context) => const Center(
             child: SizedBox(
               width: 200,
               child: LinearProgressIndicator(),

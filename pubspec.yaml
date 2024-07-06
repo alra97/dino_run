@@ -9,6 +9,7 @@ environment:
   sdk: '>=3.3.4 <4.0.0'
 
 dependencies:
+  shared_preferences: ^2.0.13
   flame: 1.17.0
   flame_audio: 2.10.1
   hive: 2.2.3
