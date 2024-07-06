@@ -1,5 +1,4 @@
 import 'dart:math';
-//work
 import 'package:flame/components.dart';
 
 import '/game/enemy.dart';
@@ -7,7 +6,7 @@ import '/game/dino_run.dart';
 import '/models/enemy_data.dart';
 
 // This class is responsible for spawning random enemies at certain
-// interval of time depending upon players current score.
+// intervals of time depending upon the player's current score.
 class EnemyManager extends Component with HasGameReference<DinoRun> {
   // A list to hold data for all the enemies.
   final List<EnemyData> _data = [];
@@ -15,7 +14,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
   // Random generator required for randomly selecting enemy type.
   final Random _random = Random();
 
-  // Timer to decide when to spawn next enemy.
+  // Timer to decide when to spawn the next enemy.
   final Timer _timer = Timer(2, repeat: true);
 
   EnemyManager() {
@@ -24,21 +23,19 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
 
   // This method is responsible for spawning a random enemy.
   void spawnRandomEnemy() {
-    final boopEnemyIndex = _data.indexWhere((enemyData) => enemyData.image.toString().contains('fly.png'));
+    final boopEnemyIndex = _data
+        .indexWhere((enemyData) => enemyData.image.toString().contains('boop'));
 
-  if (boopEnemyIndex != -1) {
-    // "boop" enemy found, prioritize spawning it
-    final enemyData = _data[boopEnemyIndex];
-    // ... rest of the enemy spawning logic using enemyData
-  } else {
-    // "boop" enemy not found, proceed with normal random selection
-    final randomIndex = _random.nextInt(_data.length);
-    final enemyData = _data.elementAt(randomIndex);
-    // ... rest of the enemy spawning logic using enemyData
-  }
-    /// Generate a random index within [_data] and get an [EnemyData].
-    final randomIndex = _random.nextInt(_data.length);
-    final enemyData = _data.elementAt(randomIndex);
+    final enemyData;
+    if (boopEnemyIndex != -1) {
+      // "boop" enemy found, prioritize spawning it
+      enemyData = _data[boopEnemyIndex];
+    } else {
+      // "boop" enemy not found, proceed with normal random selection
+      final randomIndex = _random.nextInt(_data.length);
+      enemyData = _data.elementAt(randomIndex);
+    }
+
     final enemy = Enemy(enemyData);
 
     // Help in setting all enemies on ground.
@@ -58,7 +55,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
     // use textureSize as size for the components.
     enemy.size = enemyData.textureSize;
     game.world.add(enemy);
-    }
+  }
 
   @override
   void onMount() {
@@ -68,7 +65,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
 
     // Don't fill list again and again on every mount.
     if (_data.isEmpty) {
-      // As soon as this component is mounted, initilize all the data.
+      // As soon as this component is mounted, initialize all the data.
       _data.addAll([
         EnemyData(
           image: game.images.fromCache('AngryPig/Walk (36x30).png'),
@@ -77,6 +74,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
           textureSize: Vector2(36, 30),
           speedX: 80,
           canFly: false,
+          key: 'pigwalk',
         ),
         EnemyData(
           image: game.images.fromCache('Bat/Flying (46x30).png'),
@@ -85,6 +83,7 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
           textureSize: Vector2(46, 30),
           speedX: 100,
           canFly: true,
+          key: 'blackBat',
         ),
         EnemyData(
           image: game.images.fromCache('Rino/Run (52x34).png'),
@@ -93,24 +92,27 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
           textureSize: Vector2(52, 34),
           speedX: 150,
           canFly: false,
+          key: 'rinowalk',
         ),
         EnemyData(
-        image: game.images.fromCache('boop/run.jpg'),
-        nFrames: 7, // Replace with the actual number of animation frames in "boop.jpg"
-        stepTime:0.09, // Adjust if needed for animation speed
-        textureSize: Vector2(52, 34),
-        speedX: 150,
-        canFly: false,
+            image: game.images.fromCache('boop/run.jpg'),
+            nFrames:
+                7, // Replace with the actual number of animation frames in "boop.jpg"
+            stepTime: 0.09, // Adjust if needed for animation speed
+            textureSize: Vector2(52, 34),
+            speedX: 150,
+            canFly: false,
+            key: 'boopwalk'),
+        EnemyData(
+          image: game.images.fromCache('pink/fly.png'),
+          nFrames:
+              7, // Replace with the actual number of animation frames in "xex.png"
+          stepTime: 0.1, // Adjust if needed for animation speed
+          textureSize: Vector2(46, 30),
+          speedX: 100,
+          canFly: true,
+          key: 'pinkBat',
         ),
-      EnemyData(
-        image: game.images.fromCache('pink/fly.png'),
-        nFrames: 7, // Replace with the actual number of animation frames in "xex.png"
-        stepTime:0.1, // Adjust if needed for animation speed
-        textureSize: Vector2(46, 30),
-        speedX: 100,
-        canFly: true,
-        ),
-        
       ]);
     }
     _timer.start();
