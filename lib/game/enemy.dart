@@ -21,6 +21,9 @@ class Enemy extends SpriteAnimationComponent
     );
   }
 
+  bool get isBoopEnemy =>
+      enemyData.image.toString().contains('boop/coinsNew.png');
+
   @override
   void onMount() {
     // Reduce the size of enemy as they look too

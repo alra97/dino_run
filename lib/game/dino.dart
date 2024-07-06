@@ -1,5 +1,7 @@
-import 'dart:ui';
+//Rules
+//Rhino: -2 lives, PinkBat: +1 lives
 
+import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
@@ -60,7 +62,7 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
   // Dino's current speed along y-axis.
   double speedY = 0.0;
 
-  // Controlls how long the hit animations will be played.
+  // Controls how long the hit animations will be played.
   final Timer _hitTimer = Timer(1);
 
   static const double gravity = 800;
@@ -125,7 +127,16 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     // Call hit only if other component is an Enemy and dino
     // is not already in hit state.
     if ((other is Enemy) && (!isHit)) {
-      hit();
+      // Check if the enemy is a pinkBat enemy by its image.
+      if (other.enemyData.key.toString().contains('pinkBat')) {
+        save(); //add one life
+        // You can play a special sound effect for boop if desired.
+        AudioManager.instance.playSfx('boop.wav');
+      } else if (other.enemyData.key.toString().contains('boopwalk')) {
+        playerData.boopCounter += 1;
+      } else {
+        hit(other.enemyData.key.toString());
+      }
     }
     super.onCollision(intersectionPoints, other);
   }
@@ -143,15 +154,28 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     }
   }
 
+//pinkBat add a life
+  void save() {
+    isHit = true;
+    AudioManager.instance.playSfx('hurt7.wav');
+    current = DinoAnimationStates.idle;
+    _hitTimer.start();
+    playerData.lives += 1;
+  }
+
   // This method changes the animation state to
   /// [DinoAnimationStates.hit], plays the hit sound
   /// effect and reduces the player life by 1.
-  void hit() {
+  void hit(String enemy) {
     isHit = true;
     AudioManager.instance.playSfx('hurt7.wav');
     current = DinoAnimationStates.hit;
     _hitTimer.start();
-    playerData.lives -= 1;
+    if (enemy == 'rinowalk') {
+      playerData.lives -= 2;
+    } else {
+      playerData.lives -= 1;
+    }
   }
 
   // This method reset some of the important properties

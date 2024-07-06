@@ -44,7 +44,16 @@ class Hud extends StatelessWidget {
                   builder: (_, highScore, __) {
                     return Text(
                       'High: $highScore',
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    );
+                  },
+                ),
+                Selector<PlayerData, int>(
+                  selector: (_, playerData) => playerData.boopCounter,
+                  builder: (_, boopCounter, __) {
+                    return Text(
+                      'Coins: $boopCounter',
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
                     );
                   },
                 ),
