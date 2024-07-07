@@ -1,5 +1,4 @@
 import 'dart:io';
-//alethea and felicia
 import 'package:flame/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
@@ -16,31 +15,30 @@ import 'widgets/pause_menu.dart';
 import 'widgets/settings_menu.dart';
 import 'widgets/game_over_menu.dart';
 
-Future<void> main() async {
-  // Ensures that all bindings are initialized
-  // before we start calling hive and flame code
-  // dealing with platform channels.
-  WidgetsFlutterBinding.ensureInitialized();
+late Box<PlayerData> playerDataBox;
+late PlayerData playerData;
 
-  // Initializes hive and register the adapters.
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await initHive();
+  await openPlayerDataBox();
   runApp(const DinoRunApp());
 }
 
-// This function will initialize hive with apps documents directory.
-// Additionally it will also register all the hive adapters.
 Future<void> initHive() async {
-  // For web hive does not need to be initialized.
   if (!kIsWeb) {
     final dir = await getApplicationDocumentsDirectory();
     Hive.init(dir.path);
   }
-
   Hive.registerAdapter<PlayerData>(PlayerDataAdapter());
   Hive.registerAdapter<Settings>(SettingsAdapter());
 }
 
-// The main widget for this game.
+Future<void> openPlayerDataBox() async {
+  playerDataBox = await Hive.openBox<PlayerData>('playerDataBox');
+  playerData = playerDataBox.get('playerData', defaultValue: PlayerData())!;
+}
+
 class DinoRunApp extends StatefulWidget {
   const DinoRunApp({super.key});
 
@@ -58,6 +56,7 @@ class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    playerData.save();
     super.dispose();
   }
 
@@ -66,21 +65,8 @@ class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.inactive) {
-      clearCacheAndUserData();
+      playerData.save();
     }
-  }
-
-  Future<void> clearCacheAndUserData() async {
-    // Clear cache
-    final cacheDir = await getTemporaryDirectory();
-    if (cacheDir.existsSync()) {
-      cacheDir.deleteSync(recursive: true);
-    }
-
-    // Clear Hive data
-    await Hive.close();
-    final appDir = await getApplicationDocumentsDirectory();
-    Directory(appDir.path).deleteSync(recursive: true);
   }
 
   @override
@@ -92,7 +78,6 @@ class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
         fontFamily: 'Audiowide',
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Setting up some default theme for elevated buttons.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -102,15 +87,12 @@ class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
       ),
       home: Scaffold(
         body: GameWidget<DinoRun>.controlled(
-          // This will display a loading bar until [DinoRun] completes
-          // its onLoad method.
           loadingBuilder: (context) => const Center(
             child: SizedBox(
               width: 200,
               child: LinearProgressIndicator(),
             ),
           ),
-          // Register all the overlays that will be used by this game.
           overlayBuilderMap: {
             MainMenu.id: (_, game) => MainMenu(game),
             PauseMenu.id: (_, game) => PauseMenu(game),
@@ -118,11 +100,8 @@ class _DinoRunAppState extends State<DinoRunApp> with WidgetsBindingObserver {
             GameOverMenu.id: (_, game) => GameOverMenu(game),
             SettingsMenu.id: (_, game) => SettingsMenu(game),
           },
-          // By default MainMenu overlay will be active.
           initialActiveOverlays: const [MainMenu.id],
           gameFactory: () => DinoRun(
-            // Use a fixed resolution camera to avoid manually
-            // scaling and handling different screen sizes.
             camera: CameraComponent.withFixedResolution(
               width: 360,
               height: 180,

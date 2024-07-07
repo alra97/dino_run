@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:flame/components.dart';
-
 import '/game/enemy.dart';
 import '/game/dino_run.dart';
 import '/models/enemy_data.dart';
+import '/models/player_data.dart';
 
 // This class is responsible for spawning random enemies at certain
 // intervals of time depending upon the player's current score.
@@ -17,23 +17,47 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
   // Timer to decide when to spawn the next enemy.
   final Timer _timer = Timer(2, repeat: true);
 
+  // Variable to track the last spawned enemy
+  String? _lastSpawnedEnemyKey;
+
   EnemyManager() {
     _timer.onTick = spawnRandomEnemy;
   }
 
   // This method is responsible for spawning a random enemy.
   void spawnRandomEnemy() {
-    final boopEnemyIndex = _data
+    // Get player data from the game reference
+    final playerData = game.playerData;
+
+    // Filter the enemies based on the player's lives
+    List<EnemyData> availableEnemies = _data.toList();
+
+    // Randomly select pinkBat with a frequency of 1 in 20
+    final bool selectPinkBat = _random.nextInt(20) == 0;
+
+    if (selectPinkBat) {
+      availableEnemies =
+          _data.where((enemyData) => enemyData.key == 'pinkBat').toList();
+    } else {
+      availableEnemies =
+          _data.where((enemyData) => enemyData.key != 'pinkBat').toList();
+    }
+
+    // Ensure there are available enemies to spawn
+    if (availableEnemies.isEmpty) return;
+
+    // Select a random enemy from the available enemies
+    final boopEnemyIndex = availableEnemies
         .indexWhere((enemyData) => enemyData.image.toString().contains('boop'));
 
-    final enemyData;
+    EnemyData enemyData;
     if (boopEnemyIndex != -1) {
       // "boop" enemy found, prioritize spawning it
-      enemyData = _data[boopEnemyIndex];
+      enemyData = availableEnemies[boopEnemyIndex];
     } else {
       // "boop" enemy not found, proceed with normal random selection
-      final randomIndex = _random.nextInt(_data.length);
-      enemyData = _data.elementAt(randomIndex);
+      final randomIndex = _random.nextInt(availableEnemies.length);
+      enemyData = availableEnemies[randomIndex];
     }
 
     final enemy = Enemy(enemyData);
@@ -95,18 +119,19 @@ class EnemyManager extends Component with HasGameReference<DinoRun> {
           key: 'rinowalk',
         ),
         EnemyData(
-            image: game.images.fromCache('boop/run.jpg'),
-            nFrames:
-                7, // Replace with the actual number of animation frames in "boop.jpg"
-            stepTime: 0.09, // Adjust if needed for animation speed
-            textureSize: Vector2(52, 34),
-            speedX: 150,
-            canFly: false,
-            key: 'boopwalk'),
+          image: game.images.fromCache('boop/run.jpg'),
+          nFrames:
+              7, // Replace with the actual number of animation frames in "boop.jpg"
+          stepTime: 0.09, // Adjust if needed for animation speed
+          textureSize: Vector2(52, 34),
+          speedX: 150,
+          canFly: false,
+          key: 'boopwalk',
+        ),
         EnemyData(
           image: game.images.fromCache('pink/fly.png'),
           nFrames:
-              7, // Replace with the actual number of animation frames in "xex.png"
+              7, // Replace with the actual number of animation frames in "pinkBat.png"
           stepTime: 0.1, // Adjust if needed for animation speed
           textureSize: Vector2(46, 30),
           speedX: 100,
