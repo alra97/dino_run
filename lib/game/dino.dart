@@ -1,6 +1,3 @@
-//Rules
-//Rhino: -2 lives, PinkBat: +1 lives
-
 import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -10,7 +7,6 @@ import '/game/dino_run.dart';
 import '/game/audio_manager.dart';
 import '/models/player_data.dart';
 
-/// This enum represents the animation states of [Dino].
 enum DinoAnimationStates {
   idle,
   run,
@@ -19,10 +15,8 @@ enum DinoAnimationStates {
   sprint,
 }
 
-// This represents the dino character of this game.
 class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     with CollisionCallbacks, HasGameReference<DinoRun> {
-  // A map of all the animation states and their corresponding animations.
   static final _animationMap = {
     DinoAnimationStates.idle: SpriteAnimationData.sequenced(
       amount: 4,
@@ -55,20 +49,11 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     ),
   };
 
-  // The max distance from top of the screen beyond which
-  // dino should never go. Basically the screen height - ground height
   double yMax = 0.0;
-
-  // Dino's current speed along y-axis.
   double speedY = 0.0;
-
-  // Controls how long the hit animations will be played.
   final Timer _hitTimer = Timer(1);
-
   static const double gravity = 800;
-
   final PlayerData playerData;
-
   bool isHit = false;
 
   Dino(Image image, this.playerData)
@@ -76,11 +61,7 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
 
   @override
   void onMount() {
-    // First reset all the important properties, because onMount()
-    // will be called even while restarting the game.
     _reset();
-
-    // Add a hitbox for dino.
     add(
       RectangleHitbox.relative(
         Vector2(0.5, 0.7),
@@ -89,25 +70,18 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
       ),
     );
     yMax = y;
-
-    /// Set the callback for [_hitTimer].
     _hitTimer.onTick = () {
       current = DinoAnimationStates.run;
       isHit = false;
     };
-
     super.onMount();
   }
 
   @override
   void update(double dt) {
-    // v = u + at
     speedY += gravity * dt;
-
-    // d = s0 + s * t
     y += speedY * dt;
 
-    /// This code makes sure that dino never goes beyond [yMax].
     if (isOnGround) {
       y = yMax;
       speedY = 0.0;
@@ -121,19 +95,17 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     super.update(dt);
   }
 
-  // Gets called when dino collides with other Collidables.
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    // Call hit only if other component is an Enemy and dino
-    // is not already in hit state.
     if ((other is Enemy) && (!isHit)) {
-      // Check if the enemy is a pinkBat enemy by its image.
       if (other.enemyData.key.toString().contains('pinkBat')) {
-        save(); //add one life
-        // You can play a special sound effect for boop if desired.
+        addAlife();
         AudioManager.instance.playSfx('boop.wav');
       } else if (other.enemyData.key.toString().contains('boopwalk')) {
-        playerData.boopCounter += 1;
+        if (!isHit) {
+          playerData.boopCounter += 1;
+          print('Boop Counter: ${playerData.boopCounter}');
+        }
       } else {
         hit(other.enemyData.key.toString());
       }
@@ -141,12 +113,9 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     super.onCollision(intersectionPoints, other);
   }
 
-  // Returns true if dino is on ground.
   bool get isOnGround => (y >= yMax);
 
-  // Makes the dino jump.
   void jump() {
-    // Jump only if dino is on ground.
     if (isOnGround) {
       speedY = -300;
       current = DinoAnimationStates.idle;
@@ -154,8 +123,7 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     }
   }
 
-//pinkBat add a life
-  void save() {
+  void addAlife() {
     isHit = true;
     AudioManager.instance.playSfx('hurt7.wav');
     current = DinoAnimationStates.idle;
@@ -163,9 +131,6 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     playerData.lives += 1;
   }
 
-  // This method changes the animation state to
-  /// [DinoAnimationStates.hit], plays the hit sound
-  /// effect and reduces the player life by 1.
   void hit(String enemy) {
     isHit = true;
     AudioManager.instance.playSfx('hurt7.wav');
@@ -178,8 +143,6 @@ class Dino extends SpriteAnimationGroupComponent<DinoAnimationStates>
     }
   }
 
-  // This method reset some of the important properties
-  // of this component back to normal.
   void _reset() {
     if (isMounted) {
       removeFromParent();
